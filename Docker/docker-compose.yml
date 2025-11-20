@@ -39,14 +39,14 @@ services:
       DEFAULT_PROJECT_NAME: ${STUDIO_DEFAULT_PROJECT}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
 
-      SUPABASE_URL: http://kong:8000
+      SUPABASE_URL: http://kong:8001
       SUPABASE_PUBLIC_URL: ${SUPABASE_PUBLIC_URL}
       SUPABASE_ANON_KEY: ${ANON_KEY}
       SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
       AUTH_JWT_SECRET: ${JWT_SECRET}
 
       LOGFLARE_PRIVATE_ACCESS_TOKEN: ${LOGFLARE_PRIVATE_ACCESS_TOKEN}
-      LOGFLARE_URL: http://analytics:4000
+      LOGFLARE_URL: http://analytics:4001
       NEXT_PUBLIC_ENABLE_LOGS: true
       # Comment to use Big Query backend for analytics
       NEXT_ANALYTICS_BACKEND_PROVIDER: postgres
@@ -58,7 +58,7 @@ services:
     image: kong:2.8.1
     restart: unless-stopped
     ports:
-      - ${KONG_HTTP_PORT}:8000/tcp
+      - ${KONG_HTTP_PORT}:8001/tcp
       - ${KONG_HTTPS_PORT}:8443/tcp
     volumes:
       # https://github.com/supabase/supabase/issues/12661
@@ -209,13 +209,13 @@ services:
           "/dev/null",
           "-H",
           "Authorization: Bearer ${ANON_KEY}",
-          "http://localhost:4000/api/tenants/realtime-dev/health"
+          "http://localhost:4001/api/tenants/realtime-dev/health"
         ]
       timeout: 5s
       interval: 5s
       retries: 3
     environment:
-      PORT: 4000
+      PORT: 4001
       DB_HOST: ${POSTGRES_HOST}
       DB_PORT: ${POSTGRES_PORT}
       DB_USER: supabase_admin
@@ -328,7 +328,7 @@ services:
         condition: service_healthy
     environment:
       JWT_SECRET: ${JWT_SECRET}
-      SUPABASE_URL: http://kong:8000
+      SUPABASE_URL: http://kong:8001
       SUPABASE_ANON_KEY: ${ANON_KEY}
       SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
       SUPABASE_DB_URL: postgresql://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
@@ -346,7 +346,7 @@ services:
     image: supabase/logflare:1.22.6
     restart: unless-stopped
     ports:
-      - 4000:4000
+      - 4001:4001
     # Uncomment to use Big Query backend for analytics
     # volumes:
     #   - type: bind
@@ -358,7 +358,7 @@ services:
         [
           "CMD",
           "curl",
-          "http://localhost:4000/health"
+          "http://localhost:4001/health"
         ]
       timeout: 5s
       interval: 5s
@@ -498,7 +498,7 @@ services:
           "--head",
           "-o",
           "/dev/null",
-          "http://127.0.0.1:4000/api/health"
+          "http://127.0.0.1:4001/api/health"
         ]
       interval: 10s
       timeout: 5s
@@ -509,7 +509,7 @@ services:
       analytics:
         condition: service_healthy
     environment:
-      PORT: 4000
+      PORT: 4001
       POSTGRES_PORT: ${POSTGRES_PORT}
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
