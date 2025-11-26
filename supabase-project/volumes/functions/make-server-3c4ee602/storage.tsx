@@ -549,4 +549,3 @@ function getContentType(fileName: string): string {
   
   return contentType;
 }
-
