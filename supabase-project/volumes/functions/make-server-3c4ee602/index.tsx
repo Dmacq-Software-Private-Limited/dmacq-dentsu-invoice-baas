@@ -106,6 +106,7 @@ app.post("/make-server-3c4ee602/storage/update-mime-types", storage.updateBucket
 // Invoice Management Routes
 app.get("/make-server-3c4ee602/invoices", invoices.getInvoices);
 app.get("/make-server-3c4ee602/invoices-count", invoices.getInvoicesCount);
+app.get("/make-server-3c4ee602/invoices-status-counts", invoices.getInvoicesStatusCounts);
 app.get("/make-server-3c4ee602/invoices/status/:status", invoices.getInvoicesByStatus);
 app.get("/make-server-3c4ee602/invoices/:id", invoices.getInvoice);
 app.post("/make-server-3c4ee602/invoices", invoices.createInvoice);

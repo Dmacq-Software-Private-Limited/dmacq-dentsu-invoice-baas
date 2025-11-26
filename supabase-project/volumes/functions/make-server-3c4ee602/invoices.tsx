@@ -183,6 +183,112 @@ export async function getInvoicesCount(c: Context) {
   }
 }
 
+// Get status counts for status cards
+export async function getInvoicesStatusCounts(c: Context) {
+  try {
+    console.log("📊 Fetching status counts for status cards");
+    
+    // Get Supabase client
+    const supabase = getSupabaseClient();
+    
+    // Get submitted count from submissions table
+    // Statuses: validation_in_progress, validation_failed, uploading, upload_failed, uploaded
+    const submittedStatuses = [
+      "validation_in_progress",
+      "validation_failed",
+      "uploading",
+      "upload_failed",
+      "uploaded",
+    ];
+    
+    const { count: submittedCount, error: submittedError } = await supabase
+      .from("submissions")
+      .select("*", { count: "exact", head: true })
+      .in("status", submittedStatuses);
+    
+    if (submittedError) {
+      console.error("❌ Error fetching submitted count:", submittedError);
+      return c.json({
+        error: "Failed to fetch submitted count",
+        detail: submittedError.message
+      }, 500);
+    }
+    
+    // Get pending count from invoices table (status = "Extracted")
+    const { count: pendingCount, error: pendingError } = await supabase
+      .from("invoices")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "Extracted");
+    
+    if (pendingError) {
+      console.error("❌ Error fetching pending count:", pendingError);
+      return c.json({
+        error: "Failed to fetch pending count",
+        detail: pendingError.message
+      }, 500);
+    }
+    
+    // Get disputed count from invoices table
+    // Status = "Disputed" OR has_active_disputes = true
+    const { count: disputedCount, error: disputedError } = await supabase
+      .from("invoices")
+      .select("*", { count: "exact", head: true })
+      .or("status.eq.Disputed,has_active_disputes.eq.true");
+    
+    if (disputedError) {
+      console.error("❌ Error fetching disputed count:", disputedError);
+      return c.json({
+        error: "Failed to fetch disputed count",
+        detail: disputedError.message
+      }, 500);
+    }
+    
+    // Get accepted count from invoices table (status = "Accepted" or "Success")
+    const { count: acceptedCount, error: acceptedError } = await supabase
+      .from("invoices")
+      .select("*", { count: "exact", head: true })
+      .in("status", ["Accepted", "Success"]);
+    
+    if (acceptedError) {
+      console.error("❌ Error fetching accepted count:", acceptedError);
+      return c.json({
+        error: "Failed to fetch accepted count",
+        detail: acceptedError.message
+      }, 500);
+    }
+    
+    // Get rejected count from invoices table (status = "Rejected")
+    const { count: rejectedCount, error: rejectedError } = await supabase
+      .from("invoices")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "Rejected");
+    
+    if (rejectedError) {
+      console.error("❌ Error fetching rejected count:", rejectedError);
+      return c.json({
+        error: "Failed to fetch rejected count",
+        detail: rejectedError.message
+      }, 500);
+    }
+    
+    console.log(`✅ Status counts - Submitted: ${submittedCount || 0}, Pending: ${pendingCount || 0}, Disputed: ${disputedCount || 0}, Accepted: ${acceptedCount || 0}, Rejected: ${rejectedCount || 0}`);
+    
+    return c.json({
+      submitted: submittedCount || 0,
+      pending: pendingCount || 0,
+      disputed: disputedCount || 0,
+      accepted: acceptedCount || 0,
+      rejected: rejectedCount || 0,
+    });
+  } catch (err) {
+    console.error("❌ Error in invoices-status-counts:", err);
+    return c.json({
+      error: "internal_error",
+      detail: String(err)
+    }, 500);
+  }
+}
+
 // Get single invoice by ID
 export async function getInvoice(c: Context) {
   try {
