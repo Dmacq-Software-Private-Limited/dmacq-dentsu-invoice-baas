@@ -1,7 +1,0 @@
-{
-  "nodeModulesDir": "auto",
-  "imports": {
-    "kafka": "./kafka.tsx"
-  }
-}
-
